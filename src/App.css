@@ -1,0 +1,227 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, button {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  opacity: 1;
+}
+
+button:active {
+  transform: none;
+}
+
+.ticketCard,
+.ticketCard * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.appShell {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--input);
+  color: var(--text);
+}
+
+.appMain {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.appOverlay {
+  display: none;
+}
+
+.mobileHeader {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--input);
+}
+
+.mobileMenuButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 38px;
+  font-weight: 700;
+}
+
+.mobileHeaderTitle {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.sidebar .sidebarItem {
+  border-radius: 12px !important;
+}
+
+.sidebar .sidebarItem:hover {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+.appShell.sidebarCollapsed .sidebar {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.appShell.sidebarCollapsed .mainContent {
+  /* Create a safe area for the reopen button so it doesn't overlap content */
+  padding-left: 56px;
+}
+
+.desktopSidebarReopen {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 38px;
+  font-weight: 700;
+  z-index: 100;
+}
+
+@media (max-width: 960px) {
+  .appShell.sidebarCollapsed .mainContent {
+    padding-left: 0;
+  }
+
+  .desktopSidebarReopen {
+    display: none;
+  }
+
+  .appShell {
+    position: relative;
+  }
+
+  .appShell.sidebarOpen .appMain {
+    display: none;
+  }
+
+  .appOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1999;
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(86vw, 320px) !important;
+    height: 100% !important;
+    border-right: 1px solid var(--border) !important;
+    border-bottom: none !important;
+    transform: translateX(-110%);
+    transition: transform 0.2s ease;
+    z-index: 2000;
+  }
+
+  .appShell.sidebarOpen .sidebar {
+    transform: translateX(0);
+  }
+
+  .mobileHeaderTitle {
+    font-size: 16px;
+  }
+
+  .mobileHeader {
+    display: flex;
+  }
+
+  .boardBody {
+    padding: 12px 14px !important;
+    flex-direction: column !important;
+  }
+
+  .boardRoot > div:first-child {
+    padding: 12px 14px !important;
+  }
+
+  .boardColumnsRow {
+    flex-direction: column !important;
+  }
+
+  .boardColumn {
+    flex: 0 0 auto !important;
+  }
+
+  .columnDropArea {
+    min-height: 120px !important;
+  }
+
+  .boardDeferRow {
+    width: 100% !important;
+  }
+}
