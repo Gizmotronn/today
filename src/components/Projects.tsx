@@ -3,13 +3,15 @@ import { Colors } from '../constants/theme';
 import { useColorScheme } from '../hooks/useColorScheme';
 import { useKanban } from '../store/kanban';
 import { ProjectModal } from './ProjectModal';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 import { Project } from '../types';
 
 export const Projects: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { projects, loadProjects, setSelectedProjectId, setSelectedTagId, setView } = useKanban();
+  const { projects, loadProjects, setSelectedProjectId, setSelectedTagId, setView, updateProject } = useKanban();
   const [showModal, setShowModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   useEffect(() => {
@@ -272,6 +274,40 @@ export const Projects: React.FC = () => {
             </div>
           </div>
         ))
+      )}
+
+      {showModal && editingProject && (
+        <ProjectModal
+          project={editingProject}
+          onSave={async (updated) => {
+            await updateProject(updated);
+            setShowModal(false);
+            setEditingProject(null);
+          }}
+          onClose={() => {
+            setShowModal(false);
+            setEditingProject(null);
+          }}
+          onOpenSettings={() => {
+            setShowModal(false);
+            setShowSettingsModal(true);
+          }}
+        />
+      )}
+
+      {showSettingsModal && editingProject && (
+        <ProjectSettingsModal
+          project={editingProject}
+          onSave={async (updated) => {
+            await updateProject(updated);
+            setEditingProject(updated);
+            setShowSettingsModal(false);
+          }}
+          onClose={() => {
+            setShowSettingsModal(false);
+            setShowModal(true);
+          }}
+        />
       )}
     </div>
   );

@@ -7,15 +7,19 @@ import { Project } from '../types';
 import { fileToFaviconDataUrl, urlToFaviconDataUrl } from '../lib/icon';
 
 interface ProjectModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   project?: Project | null;
+  onSave?: (project: Project) => Promise<void>;
+  onOpenSettings?: () => void;
 }
 
 export const ProjectModal: React.FC<ProjectModalProps> = ({
-  isOpen,
+  isOpen = true,
   onClose,
   project,
+  onSave: onSaveOverride,
+  onOpenSettings,
 }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
@@ -85,13 +89,19 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       endDate: formData.endDate,
       status: formData.status,
       icon: formData.icon ?? undefined,
+      color: project?.color,
     };
 
     if (project) {
-      await updateProject({
+      const updated = {
         ...project,
         ...payload,
-      });
+      };
+      if (onSaveOverride) {
+        await onSaveOverride(updated);
+      } else {
+        await updateProject(updated);
+      }
     } else {
       await addProject(payload);
     }
@@ -475,22 +485,40 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
           {project && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: colors.card,
-                color: colors.error,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '14px',
-              }}
-            >
-              Delete
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenSettings?.()}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: colors.card,
+                  color: colors.tint,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                }}
+              >
+                ⚙️ Settings
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: colors.card,
+                  color: colors.error,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                }}
+              >
+                Delete
+              </button>
+            </>
           )}
 
           <button

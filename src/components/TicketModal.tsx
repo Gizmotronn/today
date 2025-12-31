@@ -38,6 +38,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
     blockers: '',
     required: '',
     projectId: defaultProjectId ?? '',
+    deferred: false,
+    priority: false,
   });
 
   useEffect(() => {
@@ -55,6 +57,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
         blockers: (ticket.blockers || []).join(', '),
         required: (ticket.required || []).join(', '),
         projectId: ticket.projectId || '',
+        deferred: ticket.deferred || false,
+        priority: ticket.priority || false,
       });
     } else {
       setFormData({
@@ -64,6 +68,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
         blockers: '',
         required: '',
         projectId: defaultProjectId ?? '',
+        deferred: false,
+        priority: false,
       });
     }
     // Focus title on open
@@ -104,6 +110,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
         blockers,
         required,
         projectId: formData.projectId,
+        deferred: formData.deferred,
+        priority: formData.priority,
       });
     } else {
       await addTicket({
@@ -115,6 +123,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
         date: defaultDate,
         blockers,
         required,
+        deferred: formData.deferred,
+        priority: formData.priority,
       });
     }
 
@@ -310,6 +320,39 @@ export const TicketModal: React.FC<TicketModalProps> = ({
               submitRef.current?.focus();
             }}
           />
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={formData.priority}
+              onChange={(e) => {
+                // If marking as priority, unmark deferred
+                setFormData({ 
+                  ...formData, 
+                  priority: e.target.checked,
+                  deferred: e.target.checked ? false : formData.deferred,
+                });
+              }}
+              style={{ cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '13px', color: colors.text }}>🔴 Priority</span>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={formData.deferred}
+              onChange={(e) =>
+                setFormData({ ...formData, deferred: e.target.checked })
+              }
+              disabled={formData.priority}
+              style={{ cursor: formData.priority ? 'not-allowed' : 'pointer' }}
+            />
+            <span style={{ fontSize: '13px', color: formData.priority ? colors.muted : colors.text }}>
+              ⏸️ Deferred
+            </span>
+          </label>
         </div>
 
         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>

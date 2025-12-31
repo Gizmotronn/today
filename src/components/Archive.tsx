@@ -14,13 +14,35 @@ export const Archive: React.FC = () => {
   }, []);
 
   const loadArchives = async () => {
-    const data = await db.archive.orderBy('completedDate').reverse().toArray();
-    setArchives(data);
+    try {
+      const data = await db.archive.orderBy('completedDate').reverse().toArray();
+      setArchives(data);
+    } catch (error) {
+      console.error('Failed to load archives:', error);
+      alert('Error loading archives. Check console for details.');
+    }
   };
 
   return (
     <div style={{ flex: 1, padding: '20px', overflow: 'auto' }}>
-      <h1 style={{ margin: '0 0 20px 0', fontSize: '24px' }}>📦 Archive</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>📦 Archive</h1>
+        <button
+          onClick={loadArchives}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: colors.tint,
+            color: colors.background,
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: '500',
+          }}
+        >
+          Refresh
+        </button>
+      </div>
 
       {archives.length === 0 ? (
         <div

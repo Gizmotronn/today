@@ -71,6 +71,8 @@ export const Board: React.FC = () => {
   const todoTickets = tickets.filter((t) => t.status === 'todo');
   const inProgressTickets = tickets.filter((t) => t.status === 'inProgress');
   const doneTickets = tickets.filter((t) => t.status === 'done');
+  const deferredTickets = tickets.filter((t) => t.deferred && t.status === 'todo');
+  const priorityTickets = tickets.filter((t) => t.priority);
 
   const ticketById = useMemo(() => {
     const map = new Map<string, Ticket>();
@@ -339,6 +341,75 @@ export const Board: React.FC = () => {
                 onTicketClick={openEditTicket}
               />
             </div>
+
+            {/* Deferred and Priority Tickets Section */}
+            {(deferredTickets.length > 0 || priorityTickets.length > 0) && (
+              <div style={{ padding: '12px 0', borderTop: `1px solid ${colors.border}` }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <h3 style={{ margin: '0 0 8px 0', fontSize: '13px', color: colors.muted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    📌 Priority & Deferred
+                  </h3>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    {priorityTickets.map((ticket) => (
+                      <div
+                        key={ticket.id}
+                        onClick={() => openEditTicket(ticket)}
+                        style={{
+                          padding: '8px 12px',
+                          backgroundColor: '#DC2626',
+                          color: 'white',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          border: '2px solid #991B1B',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'none';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        🔴 {ticket.title}
+                      </div>
+                    ))}
+                    {deferredTickets.map((ticket) => (
+                      <div
+                        key={ticket.id}
+                        onClick={() => openEditTicket(ticket)}
+                        style={{
+                          padding: '8px 12px',
+                          backgroundColor: colors.card,
+                          color: colors.text,
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          border: `1px dashed ${colors.border}`,
+                          fontStyle: 'italic',
+                          opacity: 0.7,
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = '1';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = '0.7';
+                          e.currentTarget.style.transform = 'none';
+                        }}
+                      >
+                        ⏸️ {ticket.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="boardDeferRow" style={{ minHeight: 0 }}>

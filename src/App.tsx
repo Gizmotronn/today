@@ -8,6 +8,7 @@ import { ImportExport } from './components/ImportExport';
 import { Tags } from './components/Tags';
 import { Analytics } from './components/Analytics';
 import { ProjectTickets } from './components/ProjectTickets';
+import Calendar from './components/Calendar';
 import { useKanban } from './store/kanban';
 import { Colors } from './constants/theme';
 import { useColorScheme } from './hooks/useColorScheme';
@@ -56,6 +57,8 @@ function App() {
         return 'Analytics';
       case 'projectTickets':
         return 'Project Tickets';
+      case 'calendar':
+        return 'Calendar';
       default:
         return 'Kanban';
     }
@@ -76,6 +79,7 @@ function App() {
       | 'tags'
       | 'analytics'
       | 'projectTickets'
+      | 'calendar'
   ) => {
     setView(newView);
   };
@@ -153,6 +157,7 @@ function App() {
           {view === 'tags' && <Tags />}
           {view === 'analytics' && <Analytics />}
           {view === 'projectTickets' && <ProjectTickets />}
+          {view === 'calendar' && <Calendar />}
         </div>
       </div>
     </div>

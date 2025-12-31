@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Colors } from '../constants/theme';
-import { useColorScheme } from '../hooks/useColorScheme';
+import { useColorSchemeWithToggle } from '../hooks/useColorScheme';
 import { useKanban } from '../store/kanban';
 import { Project, Tag } from '../types';
 
@@ -15,6 +15,7 @@ interface SidebarProps {
       | 'tags'
       | 'analytics'
       | 'projectTickets'
+      | 'calendar'
   ) => void;
   isMobile?: boolean;
   onNavigate?: () => void;
@@ -23,7 +24,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onViewChange, isMobile, onNavigate, onToggleCollapse }) => {
-  const colorScheme = useColorScheme();
+  const { colorScheme, toggleColorScheme } = useColorSchemeWithToggle();
   const colors = Colors[colorScheme];
   const {
     view,
@@ -156,29 +157,54 @@ export const Sidebar: React.FC<SidebarProps> = ({ onViewChange, isMobile, onNavi
         </div>
 
         {!isMobile && (
-          <button
-            type="button"
-            onClick={() => onToggleCollapse?.()}
-            className="sidebarItem"
-            aria-label="Toggle sidebar"
-            title="Toggle sidebar"
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 12,
-              border: `1px solid ${colors.border}`,
-              backgroundColor: colors.background,
-              color: colors.muted,
-              fontSize: 14,
-              fontFamily: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: '0 0 auto',
-            }}
-          >
-            ⇤
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={toggleColorScheme}
+              className="sidebarItem"
+              aria-label="Toggle dark mode"
+              title="Toggle dark mode"
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                border: `1px solid ${colors.border}`,
+                backgroundColor: colors.background,
+                color: colors.muted,
+                fontSize: 16,
+                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: '0 0 auto',
+              }}
+            >
+              {colorScheme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleCollapse?.()}
+              className="sidebarItem"
+              aria-label="Toggle sidebar"
+              title="Toggle sidebar"
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                border: `1px solid ${colors.border}`,
+                backgroundColor: colors.background,
+                color: colors.muted,
+                fontSize: 14,
+                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: '0 0 auto',
+              }}
+            >
+              ⇤
+            </button>
+          </div>
         )}
       </div>
 
@@ -236,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onViewChange, isMobile, onNavi
         />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minHeight: 0 }}>
         <div>
           <button
             className="sidebarItem"
@@ -264,7 +290,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ onViewChange, isMobile, onNavi
         </div>
       </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <button
+          className="sidebarItem"
+          type="button"
+          onClick={() => {
+            onViewChange('calendar');
+            onNavigate?.();
+          }}
+          style={{
+            padding: '10px 10px',
+            textAlign: 'left',
+            backgroundColor: view === 'calendar' ? colors.card : 'transparent',
+            border: `1px solid ${view === 'calendar' ? colors.border : 'transparent'}`,
+            borderRadius: 10,
+            color: colors.text,
+            fontSize: 13,
+            fontFamily: 'inherit',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <span style={{ width: 18, textAlign: 'center' }}>📅</span>
+          Calendar
+        </button>
+
         <button
           className="sidebarItem"
           type="button"

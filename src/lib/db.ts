@@ -1,11 +1,14 @@
 import Dexie, { Table } from 'dexie';
-import { Ticket, ArchiveEntry, Project, Tag } from '../types';
+import { Ticket, ArchiveEntry, Project, Tag, DayEntry, Event, LocationHistory } from '../types';
 
 export class KanbanDB extends Dexie {
   tickets!: Table<Ticket>;
   archive!: Table<ArchiveEntry>;
   projects!: Table<Project>;
   tags!: Table<Tag>;
+  dayEntries!: Table<DayEntry>;
+  events!: Table<Event>;
+  locations!: Table<LocationHistory>;
 
   constructor() {
     super('kanban');
@@ -21,6 +24,26 @@ export class KanbanDB extends Dexie {
       archive: '++id, completedDate',
       projects: '++id, group, endDate',
       tags: 'id',
+    });
+
+    // v3: add dayEntries table for calendar feature
+    this.version(3).stores({
+      tickets: '++id, date, status, projectId',
+      archive: '++id, completedDate',
+      projects: '++id, group, endDate',
+      tags: 'id',
+      dayEntries: 'date',
+    });
+
+    // v4: add events and location history
+    this.version(4).stores({
+      tickets: '++id, date, status, projectId',
+      archive: '++id, completedDate',
+      projects: '++id, group, endDate',
+      tags: 'id',
+      dayEntries: 'date',
+      events: '++id, date, projectId',
+      locations: 'location',
     });
   }
 }
@@ -172,6 +195,36 @@ export async function ensureTagsExist(tagIds: string[]): Promise<void> {
   }
 }
 
+// Day Entries (Calendar)
+export async function getDayEntry(date: string): Promise<DayEntry | undefined> {
+  return db.dayEntries.get(date);
+}
+
+export async function upsertDayEntry(dayEntry: DayEntry): Promise<string> {
+  return db.dayEntries.put(dayEntry);
+}
+
+export async function getDayEntriesForMonth(year: number, month: number): Promise<DayEntry[]> {
+  // Get all day entries for the specified month
+  const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const endDate = new Date(year, month + 1, 0);
+  const endDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+  
+  return db.dayEntries
+    .where('date')
+    .between(startDate, endDateStr, true, true)
+    .toArray();
+}
+
+export async function getDeferredTicketsForDate(date: string): Promise<Ticket[]> {
+  // Get tickets that were deferred to this date (status is 'todo' and date matches)
+  return db.tickets
+    .where('date')
+    .equals(date)
+    .and((t) => t.status === 'todo')
+    .toArray();
+}
+
 // Import/Export
 export type ExportPayload = {
   version: 1;
@@ -180,14 +233,20 @@ export type ExportPayload = {
   projects: Project[];
   archive: ArchiveEntry[];
   tags: Tag[];
+  dayEntries: DayEntry[];
+  events: Event[];
+  locations: LocationHistory[];
 };
 
 export async function exportAll(): Promise<ExportPayload> {
-  const [tickets, projects, archive, tags] = await Promise.all([
+  const [tickets, projects, archive, tags, dayEntries, events, locations] = await Promise.all([
     db.tickets.toArray(),
     db.projects.toArray(),
     db.archive.toArray(),
     db.tags.toArray(),
+    db.dayEntries.toArray(),
+    db.events.toArray(),
+    db.locations.toArray(),
   ]);
   return {
     version: 1,
@@ -196,6 +255,9 @@ export async function exportAll(): Promise<ExportPayload> {
     projects,
     archive,
     tags,
+    dayEntries,
+    events,
+    locations,
   };
 }
 
@@ -204,11 +266,17 @@ export async function importAll(payload: Partial<ExportPayload>): Promise<void> 
   const projects = Array.isArray(payload.projects) ? payload.projects : [];
   const archive = Array.isArray(payload.archive) ? payload.archive : [];
   const tags = Array.isArray(payload.tags) ? payload.tags : [];
+  const dayEntries = Array.isArray(payload.dayEntries) ? payload.dayEntries : [];
+  const events = Array.isArray(payload.events) ? payload.events : [];
+  const locations = Array.isArray(payload.locations) ? payload.locations : [];
 
-  await db.transaction('rw', db.tickets, db.projects, db.archive, db.tags, async () => {
+  await db.transaction('rw', [db.tickets, db.projects, db.archive, db.tags, db.dayEntries, db.events, db.locations], async () => {
     if (projects.length > 0) await db.projects.bulkPut(projects);
     if (tickets.length > 0) await db.tickets.bulkPut(tickets);
     if (archive.length > 0) await db.archive.bulkPut(archive);
     if (tags.length > 0) await db.tags.bulkPut(tags);
+    if (dayEntries.length > 0) await db.dayEntries.bulkPut(dayEntries);
+    if (events.length > 0) await db.events.bulkPut(events);
+    if (locations.length > 0) await db.locations.bulkPut(locations);
   });
 }

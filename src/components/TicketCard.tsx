@@ -13,7 +13,7 @@ interface TicketCardProps {
 export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { deleteTicket, projects } = useKanban();
+  const { deleteTicket, updateTicket, projects } = useKanban();
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: ticket.id,
@@ -30,6 +30,24 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
     const project = projects.find((p) => p.id === ticket.projectId);
     return project?.name || '';
   }, [projects, ticket.projectId]);
+
+  const handleToggleDeferred = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await updateTicket({
+      ...ticket,
+      deferred: !ticket.deferred,
+    });
+  };
+
+  const handleTogglePriority = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // If marking as priority, also unmark as deferred
+    await updateTicket({
+      ...ticket,
+      priority: !ticket.priority,
+      deferred: ticket.priority ? ticket.deferred : false,
+    });
+  };
 
   return (
     <div
@@ -106,6 +124,55 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
         🗑️
       </button>
 
+      <button
+        type="button"
+        aria-label={ticket.priority ? 'Unmark as priority' : 'Mark as priority'}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={handleTogglePriority}
+        style={{
+          position: 'absolute',
+          right: 42,
+          top: 10,
+          width: 26,
+          height: 26,
+          borderRadius: 999,
+          border: `2px solid ${ticket.priority ? '#DC2626' : colors.border}`,
+          backgroundColor: ticket.priority ? '#DC2626' : colors.background,
+          color: ticket.priority ? 'white' : colors.text,
+          display: 'grid',
+          placeItems: 'center',
+          cursor: 'pointer',
+          opacity: isHovered ? 1 : 0.7,
+          fontWeight: 'bold',
+        }}
+      >
+        🔴
+      </button>
+
+      <button
+        type="button"
+        aria-label={ticket.deferred ? 'Unmark as deferred' : 'Mark as deferred'}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={handleToggleDeferred}
+        style={{
+          position: 'absolute',
+          right: 74,
+          top: 10,
+          width: 26,
+          height: 26,
+          borderRadius: 999,
+          border: `2px solid ${ticket.deferred ? colors.muted : colors.border}`,
+          backgroundColor: ticket.deferred ? colors.card : colors.background,
+          color: colors.text,
+          display: 'grid',
+          placeItems: 'center',
+          cursor: 'pointer',
+          opacity: isHovered ? 1 : 0.7,
+        }}
+      >
+        ⏸️
+      </button>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div
           style={{
@@ -113,7 +180,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
             fontWeight: 700,
             lineHeight: '18px',
             color: colors.text,
-            paddingRight: 30,
+            paddingRight: 100,
             wordBreak: 'break-word',
           }}
         >
